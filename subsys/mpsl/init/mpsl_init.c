@@ -29,6 +29,10 @@
 #include <mpsl/mpsl_pm_utils.h>
 #endif
 
+#if CONFIG_RADIO_ESB_BT
+extern bool ble_mode;
+#endif
+
 LOG_MODULE_REGISTER(mpsl_init, CONFIG_MPSL_LOG_LEVEL);
 
 #if defined(CONFIG_MPSL_CALIBRATION_PERIOD)
@@ -422,10 +426,16 @@ static int32_t mpsl_lib_init_internal(void)
 	return 0;
 }
 
-static int mpsl_lib_init_sys(void)
+int mpsl_lib_init_sys(void)
 {
 	int err = 0;
 
+#if CONFIG_RADIO_ESB_BT
+	if(!ble_mode)
+	{
+		return;
+	}
+#endif
 	err = mpsl_lib_init_internal();
 	if (err) {
 		return err;
@@ -465,8 +475,14 @@ static int mpsl_lib_init_sys(void)
 	return 0;
 }
 
-static int mpsl_low_prio_init(void)
+int mpsl_low_prio_init(void)
 {
+#if CONFIG_RADIO_ESB_BT
+	if(!ble_mode)
+	{
+		return;
+	}
+#endif
 
 	k_work_queue_start(&mpsl_work_q, mpsl_work_stack,
 			   K_THREAD_STACK_SIZEOF(mpsl_work_stack),
